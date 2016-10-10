@@ -2,38 +2,24 @@
 # by George Yu
 # A genetic word generator that tries to get a specific string.
 
-from string import ascii_lowercase as alphabet
+from string import ascii_lowercase as allLetters
 from random import random, randint, choice
-import tkinter
-import threading
+from threading import Thread
+from sys import exit
+import tkinter as tk
 
-alphabet += ' '
+allLetters += ' !.,?\''
 correct = 'to be or not to be'
 length = len(correct)
 popSize = 30
+mutationRate = 6
 
-root = tkinter.Tk()
+root = tk.Tk()
 root.title('Shakespear')
-fitDisplay = tkinter.StringVar(root)
-popDisplay = tkinter.StringVar(root)
-tkinter.Label(root, font=('Monaco', 20), height=6, width=length+12, textvariable=fitDisplay).pack()
-tkinter.Label(root, font=('Monaco', 12), textvariable=popDisplay).pack(side='left',fill='x')
-
-class start(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-    def run(self):
-        newDNA = [None for i in range(popSize)]
-        popNum = 1
-        while True:
-            popDisplay.set(' Population: %d'%popNum)
-            popNum += 1
-            population = []
-            for dna in newDNA:
-                population.append(generate(dna))
-            newDNA = reproduce(population)
-            if newDNA == True:
-                break
+fitDisplay = tk.StringVar(root)
+popDisplay = tk.StringVar(root)
+tk.Label(root, font=('Monaco', 20), height=6, width=length+12, textvariable=fitDisplay).pack()
+tk.Label(root, font=('Monaco', 11), textvariable=popDisplay).pack(side='left',fill='x')
 
 def calcFitness(individual):
     fitnessVal = 1
@@ -46,19 +32,20 @@ def generate(dna):
     if dna:
         return dna
     else:
-        return ''.join(choice(alphabet) for i in range(length))
+        return ''.join(choice(allLetters) for i in range(length))
 
 def crossover(father, mother):
     split = randint(1, len(father))
     new = list(father[:split] + mother[split:])
     for i in range(len(new)):
-        if random() < 0.1:
-            new[i] = choice(alphabet)
+        if random()*100 < mutationRate:
+            new[i] = choice(allLetters)
     return ''.join(new)
 
 def reproduce(population):
     fitnesses = [calcFitness(i) for i in population]
     maxFit = population[fitnesses.index(max(fitnesses))]
+##    print(maxFit)
     fitDisplay.set(maxFit)
     if maxFit == correct:
         return True
@@ -67,9 +54,24 @@ def reproduce(population):
         matingPool += [indiv for i in range(fitness)]
     newDNA = []
     for i in range(popSize):
-        newDNA.append(crossover(choice(matingPool), choice(matingPool))) 
+        newDNA.append(crossover(choice(matingPool), choice(matingPool)))
     return newDNA
 
-thread = start()
-thread.start()
-root.mainloop()
+def main():
+    newDNA = [None for i in range(popSize)]
+    popNum = 1
+    while True:
+        popDisplay.set(' Population: %d'%popNum)
+        popNum += 1
+        population = []
+        for dna in newDNA:
+            population.append(generate(dna))
+        newDNA = reproduce(population)
+        if newDNA == True:
+            return
+
+try:
+    Thread(target=main).start()
+    root.mainloop()
+except:
+    exit()
