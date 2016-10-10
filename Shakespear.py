@@ -2,13 +2,13 @@
 # by George Yu
 # A genetic word generator that tries to get a specific string.
 
-from string import ascii_lowercase as allLetters
+from string import ascii_lowercase as allChars
 from random import random, randint, choice
 from threading import Thread
 from sys import exit
 import tkinter as tk
 
-allLetters += ' !.,?\''
+allChars += ' !.,?\'' # I didn't use string.punctuation because there is a lot of unusual characters, you may use it if you like
 correct = 'to be or not to be'
 length = len(correct)
 popSize = 30
@@ -32,14 +32,14 @@ def generate(dna):
     if dna:
         return dna
     else:
-        return ''.join(choice(allLetters) for i in range(length))
+        return ''.join(choice(allChars) for i in range(length))
 
 def crossover(father, mother):
     split = randint(1, len(father))
     new = list(father[:split] + mother[split:])
     for i in range(len(new)):
         if random()*100 < mutationRate:
-            new[i] = choice(allLetters)
+            new[i] = choice(allChars)
     return ''.join(new)
 
 def reproduce(population):
